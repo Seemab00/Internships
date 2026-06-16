@@ -1,4 +1,4 @@
-# Internships - CodeAlpha & SaiKet Systems
+# Internships 
 
 ## 📌 About
 
