@@ -2,7 +2,7 @@
 
 ## 📌 About
 
-Completed **three virtual internships** in Frontend Development, and C/C++ Development.
+Completed **three virtual internships** in software development, gaining hands-on experience in C++ programming, frontend development, and C/C++ application development. Each internship provided practical exposure to real-world projects, industry tools, and professional workflows.
 
 ---
 
