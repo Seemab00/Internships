@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Gallery | CodeAlpha Task 1</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            padding: 40px 20px 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .categories {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .filter-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            padding: 10px 25px;
+            margin: 5px;
+            border-radius: 30px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active, .filter-btn:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        .gallery-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            cursor: pointer;
+            background: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: all 0.3s ease;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            color: white;
+            padding: 15px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover .overlay {
+            transform: translateY(0);
+        }
+
+        .overlay h3 {
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .overlay p {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        /* Lightbox */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 80%;
+            border-radius: 10px;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.5);
+        }
+
+        .lightbox-caption {
+            color: white;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .close-lightbox {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            font-size: 40px;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .close-lightbox:hover {
+            color: #ff6b6b;
+        }
+
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            font-size: 40px;
+            padding: 15px 20px;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.4);
+        }
+
+        .prev-btn {
+            left: 20px;
+        }
+
+        .next-btn {
+            right: 20px;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            padding: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 15px;
+            }
+            .gallery-item img {
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1><i class="fas fa-images"></i> Image Gallery</h1>
+    <p>Beautiful collection of nature, city, and animal photography</p>
+</div>
+
+<div class="categories">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="nature">🌿 Nature</button>
+    <button class="filter-btn" data-filter="city">🏙️ City</button>
+    <button class="filter-btn" data-filter="animals">🐾 Animals</button>
+</div>
+
+<div class="gallery-container">
+    <div class="gallery" id="gallery"></div>
+</div>
+
+<div class="footer">
+    <p>© 2024 Image Gallery | Click on any image to view in lightbox | Use arrow keys to navigate</p>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+    <span class="close-lightbox" onclick="closeLightbox()">&times;</span>
+    <button class="nav-btn prev-btn" onclick="prevImage()">❮</button>
+    <img class="lightbox-img" id="lightboxImg" src="" alt="">
+    <button class="nav-btn next-btn" onclick="nextImage()">❯</button>
+    <div class="lightbox-caption" id="lightboxCaption"></div>
+</div>
+
+<script>
+    // Real Images from Unsplash (Free & Reliable)
+    const images = [
+        // Nature Images
+        { src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop", title: "Mountain Peak", category: "nature", description: "Beautiful mountain landscape with snow-capped peaks" },
+        { src: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&h=300&fit=crop", title: "Green Valley", category: "nature", description: "Lush green valley with rolling hills" },
+        { src: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=400&h=300&fit=crop", title: "Waterfall", category: "nature", description: "Cascading waterfall in tropical forest" },
+        { src: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop", title: "Beach Sunset", category: "nature", description: "Peaceful beach at golden hour" },
+        
+        // City Images
+        { src: "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=400&h=300&fit=crop", title: "City Skyline", category: "city", description: "Modern city skyline at dusk" },
+        { src: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop", title: "Downtown Street", category: "city", description: "Busy downtown street with lights" },
+        { src: "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=400&h=300&fit=crop", title: "Urban Architecture", category: "city", description: "Modern architectural masterpiece" },
+        { src: "https://images.unsplash.com/photo-1464790719320-516ecd75af6c?w=400&h=300&fit=crop", title: "Night City", category: "city", description: "City lights at night" },
+        { src: "https://images.unsplash.com/photo-1485738422979-f5c462d49f74?w=400&h=300&fit=crop", title: "Bridge View", category: "city", description: "Famous bridge with city background" },
+        
+        // Animals Images
+        { src: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=300&fit=crop", title: "Cute Cat", category: "animals", description: "Adorable domestic cat resting" },
+        { src: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400&h=300&fit=crop", title: "Happy Dog", category: "animals", description: "Friendly golden retriever" },
+        { src: "https://images.unsplash.com/photo-1561037404-61cd46aa615b?w=400&h=300&fit=crop", title: "Playful Puppy", category: "animals", description: "Cute puppy playing" },
+        { src: "https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?w=400&h=300&fit=crop", title: "Fluffy Dog", category: "animals", description: "Fluffy white dog" }
+    ];
+
+    let currentFilter = "all";
+    let currentIndex = 0;
+    let filteredImages = [];
+
+    // Render Gallery
+    function renderGallery() {
+        const gallery = document.getElementById('gallery');
+        
+        filteredImages = images.filter(img => {
+            if (currentFilter === "all") return true;
+            return img.category === currentFilter;
+        });
+        
+        let html = '';
+        filteredImages.forEach((img, index) => {
+            html += `
+                <div class="gallery-item" onclick="openLightbox(${index})">
+                    <img src="${img.src}" alt="${img.title}" loading="lazy">
+                    <div class="overlay">
+                        <h3>${img.title}</h3>
+                        <p>${img.description}</p>
+                    </div>
+                </div>
+            `;
+        });
+        
+        gallery.innerHTML = html;
+    }
+
+    // Open Lightbox
+    function openLightbox(index) {
+        currentIndex = index;
+        const img = filteredImages[currentIndex];
+        document.getElementById('lightboxImg').src = img.src;
+        document.getElementById('lightboxCaption').innerHTML = `<h3>${img.title}</h3><p>${img.description}</p>`;
+        document.getElementById('lightbox').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    // Close Lightbox
+    function closeLightbox() {
+        document.getElementById('lightbox').classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+
+    // Next Image
+    function nextImage() {
+        if (currentIndex < filteredImages.length - 1) {
+            currentIndex++;
+        } else {
+            currentIndex = 0;
+        }
+        const img = filteredImages[currentIndex];
+        document.getElementById('lightboxImg').src = img.src;
+        document.getElementById('lightboxCaption').innerHTML = `<h3>${img.title}</h3><p>${img.description}</p>`;
+    }
+
+    // Previous Image
+    function prevImage() {
+        if (currentIndex > 0) {
+            currentIndex--;
+        } else {
+            currentIndex = filteredImages.length - 1;
+        }
+        const img = filteredImages[currentIndex];
+        document.getElementById('lightboxImg').src = img.src;
+        document.getElementById('lightboxCaption').innerHTML = `<h3>${img.title}</h3><p>${img.description}</p>`;
+    }
+
+    // Keyboard Navigation
+    document.addEventListener('keydown', function(e) {
+        const lightbox = document.getElementById('lightbox');
+        if (lightbox.classList.contains('active')) {
+            if (e.key === 'Escape') closeLightbox();
+            else if (e.key === 'ArrowRight') nextImage();
+            else if (e.key === 'ArrowLeft') prevImage();
+        }
+    });
+
+    // Filter Buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentFilter = this.getAttribute('data-filter');
+            renderGallery();
+        });
+    });
+
+    // Initial Render
+    renderGallery();
+</script>
+</body>
+</html>

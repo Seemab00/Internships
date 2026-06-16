@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Calculator | CodeAlpha Task 2</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Main Container */
+        .calculator-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* Calculator */
+        .calculator {
+            background: #0f0f1a;
+            border-radius: 20px;
+            padding: 20px;
+            width: 500px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        /* Display */
+        .display {
+            background: #0a0a0f;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: right;
+        }
+
+        .expression {
+            color: #888;
+            font-size: 0.9rem;
+            min-height: 25px;
+            word-wrap: break-word;
+        }
+
+        .result {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: bold;
+            word-wrap: break-word;
+            word-break: break-all;
+            min-height: 70px;
+        }
+
+        /* Buttons Grid */
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        /* Button Styles */
+        button {
+            padding: 14px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            transform: scale(0.96);
+            opacity: 0.9;
+        }
+
+        /* Memory Buttons */
+        .memory {
+            background: #2c3e50;
+            color: #ecf0f1;
+        }
+
+        /* Scientific Buttons */
+        .scientific {
+            background: #34495e;
+            color: #ecf0f1;
+        }
+
+        /* Number Buttons */
+        .number {
+            background: #1e1e2e;
+            color: white;
+        }
+
+        /* Operator Buttons */
+        .operator {
+            background: #e67e22;
+            color: white;
+        }
+
+        /* Equals Button */
+        .equals {
+            background: #27ae60;
+            color: white;
+        }
+
+        /* Clear Button */
+        .clear {
+            background: #c0392b;
+            color: white;
+        }
+
+        /* History Panel */
+        .history-panel {
+            background: #0f0f1a;
+            border-radius: 20px;
+            padding: 20px;
+            width: 280px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .history-header {
+            color: white;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+
+        .history-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: #1a1a2a;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .history-item:hover {
+            background: #2a2a3a;
+        }
+
+        .history-expression {
+            color: #aaa;
+            font-size: 0.8rem;
+        }
+
+        .history-result {
+            color: #4caf50;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .memory-display {
+            background: #1a1a2a;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .memory-label {
+            color: #888;
+            font-size: 0.8rem;
+        }
+
+        .memory-value {
+            color: #e67e22;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .clear-history {
+            background: #c0392b;
+            color: white;
+            padding: 8px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        /* Scrollbar */
+        .history-list::-webkit-scrollbar {
+            width: 5px;
+        }
+        .history-list::-webkit-scrollbar-track {
+            background: #1a1a2a;
+        }
+        .history-list::-webkit-scrollbar-thumb {
+            background: #e67e22;
+            border-radius: 5px;
+        }
+
+        @media (max-width: 850px) {
+            .calculator-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .history-panel {
+                width: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="calculator-container">
+    <!-- Calculator Main -->
+    <div class="calculator">
+        <div class="display">
+            <div class="expression" id="expression"></div>
+            <div class="result" id="result">0</div>
+        </div>
+        
+        <div class="buttons">
+            <!-- Row 1: Memory -->
+            <button class="memory" id="mc">MC</button>
+            <button class="memory" id="mr">MR</button>
+            <button class="memory" id="mplus">M+</button>
+            <button class="memory" id="mminus">M-</button>
+            <button class="memory" id="ms">MS</button>
+            
+            <!-- Row 2 -->
+            <button class="scientific" id="reciprocal">1/x</button>
+            <button class="scientific" id="square">x²</button>
+            <button class="scientific" id="sqrt">√x</button>
+            <button class="scientific" id="percent">%</button>
+            <button class="scientific" id="plusminus">+/−</button>
+            
+            <!-- Row 3 -->
+            <button class="number" data-num="7">7</button>
+            <button class="number" data-num="8">8</button>
+            <button class="number" data-num="9">9</button>
+            <button class="clear" id="c">C</button>
+            <button class="clear" id="ce">CE</button>
+            
+            <!-- Row 4 -->
+            <button class="number" data-num="4">4</button>
+            <button class="number" data-num="5">5</button>
+            <button class="number" data-num="6">6</button>
+            <button class="operator" data-op="/">÷</button>
+            <button class="operator" data-op="*">×</button>
+            
+            <!-- Row 5 -->
+            <button class="number" data-num="1">1</button>
+            <button class="number" data-num="2">2</button>
+            <button class="number" data-num="3">3</button>
+            <button class="operator" data-op="+">+</button>
+            <button class="operator" data-op="-">-</button>
+            
+            <!-- Row 6 -->
+            <button class="number" data-num="0">0</button>
+            <button class="number" data-num=".">.</button>
+            <button class="equals" id="equals">=</button>
+        </div>
+    </div>
+
+    <!-- History & Memory Panel -->
+    <div class="history-panel">
+        <div class="history-header">
+            <i class="fas fa-history"></i> History
+        </div>
+        <div class="history-list" id="historyList">
+            <div style="color: #666; text-align: center; padding: 20px;">No history yet</div>
+        </div>
+        
+        <div class="memory-display">
+            <div class="memory-label"><i class="fas fa-database"></i> Memory</div>
+            <div class="memory-value" id="memoryValue">0</div>
+        </div>
+        
+        <button class="clear-history" id="clearHistory">Clear History</button>
+    </div>
+</div>
+
+<script>
+    // Calculator State
+    let currentInput = '0';
+    let previousInput = '';
+    let operator = null;
+    let waitingForOperand = false;
+    let memory = 0;
+    let history = [];
+
+    // DOM Elements
+    const expressionDiv = document.getElementById('expression');
+    const resultDiv = document.getElementById('result');
+    const memoryValueDiv = document.getElementById('memoryValue');
+    const historyListDiv = document.getElementById('historyList');
+
+    // Update Display
+    function updateDisplay() {
+        resultDiv.textContent = currentInput;
+        if (operator && waitingForOperand) {
+            expressionDiv.textContent = `${previousInput} ${getOperatorSymbol(operator)}`;
+        } else {
+            expressionDiv.textContent = '';
+        }
+    }
+
+    // Get Operator Symbol
+    function getOperatorSymbol(op) {
+        switch(op) {
+            case '+': return '+';
+            case '-': return '-';
+            case '*': return '×';
+            case '/': return '÷';
+            default: return op;
+        }
+    }
+
+    // Calculate
+    function calculate() {
+        let result = 0;
+        const prev = parseFloat(previousInput);
+        const current = parseFloat(currentInput);
+        
+        if (isNaN(prev) || isNaN(current)) return;
+        
+        switch(operator) {
+            case '+': result = prev + current; break;
+            case '-': result = prev - current; break;
+            case '*': result = prev * current; break;
+            case '/': 
+                if (current === 0) {
+                    alert('Cannot divide by zero!');
+                    clearAll();
+                    return;
+                }
+                result = prev / current; 
+                break;
+            default: return;
+        }
+        
+        // Add to history
+        const historyEntry = `${previousInput} ${getOperatorSymbol(operator)} ${currentInput} = ${result}`;
+        addToHistory(historyEntry);
+        
+        currentInput = result.toString();
+        previousInput = '';
+        operator = null;
+        waitingForOperand = false;
+        updateDisplay();
+    }
+
+    // Add to History
+    function addToHistory(entry) {
+        history.unshift(entry);
+        if (history.length > 20) history.pop();
+        updateHistoryDisplay();
+    }
+
+    // Update History Display
+    function updateHistoryDisplay() {
+        if (history.length === 0) {
+            historyListDiv.innerHTML = '<div style="color: #666; text-align: center; padding: 20px;">No history yet</div>';
+            return;
+        }
+        
+        let html = '';
+        history.forEach((item, index) => {
+            html += `
+                <div class="history-item" onclick="useHistory(${index})">
+                    <div class="history-expression">${item.split('=')[0]}</div>
+                    <div class="history-result">= ${item.split('=')[1]}</div>
+                </div>
+            `;
+        });
+        historyListDiv.innerHTML = html;
+    }
+
+    // Use History Item
+    function useHistory(index) {
+        const item = history[index];
+        const result = item.split('=')[1].trim();
+        currentInput = result;
+        previousInput = '';
+        operator = null;
+        waitingForOperand = false;
+        updateDisplay();
+    }
+
+    // Clear History
+    function clearHistory() {
+        history = [];
+        updateHistoryDisplay();
+    }
+
+    // Input Number
+    function inputNumber(num) {
+        if (waitingForOperand) {
+            currentInput = num;
+            waitingForOperand = false;
+        } else {
+            currentInput = currentInput === '0' ? num : currentInput + num;
+        }
+        updateDisplay();
+    }
+
+    // Input Decimal
+    function inputDecimal() {
+        if (waitingForOperand) {
+            currentInput = '0.';
+            waitingForOperand = false;
+        } else if (!currentInput.includes('.')) {
+            currentInput += '.';
+        }
+        updateDisplay();
+    }
+
+    // Input Operator
+    function inputOperator(op) {
+        if (operator && !waitingForOperand) {
+            calculate();
+        }
+        previousInput = currentInput;
+        operator = op;
+        waitingForOperand = true;
+        updateDisplay();
+    }
+
+    // Clear All
+    function clearAll() {
+        currentInput = '0';
+        previousInput = '';
+        operator = null;
+        waitingForOperand = false;
+        updateDisplay();
+    }
+
+    // Clear Entry
+    function clearEntry() {
+        currentInput = '0';
+        updateDisplay();
+    }
+
+    // Plus/Minus
+    function plusMinus() {
+        currentInput = (parseFloat(currentInput) * -1).toString();
+        updateDisplay();
+    }
+
+    // Percentage
+    function percent() {
+        currentInput = (parseFloat(currentInput) / 100).toString();
+        updateDisplay();
+    }
+
+    // Square
+    function square() {
+        const val = parseFloat(currentInput);
+        currentInput = (val * val).toString();
+        addToHistory(`${val}² = ${currentInput}`);
+        updateDisplay();
+    }
+
+    // Square Root
+    function squareRoot() {
+        const val = parseFloat(currentInput);
+        if (val < 0) {
+            alert('Cannot take square root of negative number');
+            return;
+        }
+        currentInput = Math.sqrt(val).toString();
+        addToHistory(`√${val} = ${currentInput}`);
+        updateDisplay();
+    }
+
+    // Reciprocal (1/x)
+    function reciprocal() {
+        const val = parseFloat(currentInput);
+        if (val === 0) {
+            alert('Cannot divide by zero');
+            return;
+        }
+        currentInput = (1 / val).toString();
+        addToHistory(`1/${val} = ${currentInput}`);
+        updateDisplay();
+    }
+
+    // Memory Functions
+    function memoryClear() {
+        memory = 0;
+        updateMemoryDisplay();
+    }
+
+    function memoryRecall() {
+        currentInput = memory.toString();
+        waitingForOperand = false;
+        updateDisplay();
+    }
+
+    function memoryAdd() {
+        memory += parseFloat(currentInput);
+        updateMemoryDisplay();
+    }
+
+    function memorySubtract() {
+        memory -= parseFloat(currentInput);
+        updateMemoryDisplay();
+    }
+
+    function memoryStore() {
+        memory = parseFloat(currentInput);
+        updateMemoryDisplay();
+    }
+
+    function updateMemoryDisplay() {
+        memoryValueDiv.textContent = memory;
+    }
+
+    // Keyboard Support
+    function handleKeyboard(e) {
+        const key = e.key;
+        
+        if (key >= '0' && key <= '9') inputNumber(key);
+        else if (key === '.') inputDecimal();
+        else if (key === '+') inputOperator('+');
+        else if (key === '-') inputOperator('-');
+        else if (key === '*') inputOperator('*');
+        else if (key === '/') { e.preventDefault(); inputOperator('/'); }
+        else if (key === 'Enter' || key === '=') calculate();
+        else if (key === 'Escape') clearAll();
+        else if (key === 'Delete') clearEntry();
+    }
+
+    // Event Listeners
+    document.querySelectorAll('.number').forEach(btn => {
+        btn.addEventListener('click', () => inputNumber(btn.getAttribute('data-num')));
+    });
+    
+    document.querySelectorAll('.operator').forEach(btn => {
+        btn.addEventListener('click', () => inputOperator(btn.getAttribute('data-op')));
+    });
+    
+    document.getElementById('equals').addEventListener('click', calculate);
+    document.getElementById('c').addEventListener('click', clearAll);
+    document.getElementById('ce').addEventListener('click', clearEntry);
+    document.getElementById('plusminus').addEventListener('click', plusMinus);
+    document.getElementById('percent').addEventListener('click', percent);
+    document.getElementById('square').addEventListener('click', square);
+    document.getElementById('sqrt').addEventListener('click', squareRoot);
+    document.getElementById('reciprocal').addEventListener('click', reciprocal);
+    
+    // Memory buttons
+    document.getElementById('mc').addEventListener('click', memoryClear);
+    document.getElementById('mr').addEventListener('click', memoryRecall);
+    document.getElementById('mplus').addEventListener('click', memoryAdd);
+    document.getElementById('mminus').addEventListener('click', memorySubtract);
+    document.getElementById('ms').addEventListener('click', memoryStore);
+    document.getElementById('clearHistory').addEventListener('click', clearHistory);
+    
+    document.addEventListener('keydown', handleKeyboard);
+    
+    // Initialize
+    updateDisplay();
+    updateMemoryDisplay();
+
+    // Make useHistory globally accessible
+    window.useHistory = useHistory;
+</script>
+</body>
+</html>
